@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"os"
 
@@ -12,7 +13,12 @@ import (
 
 const accessTokenVariable = "DIGITALOCEAN_ACCESS_TOKEN"
 
+var (
+	dryrun = flag.Bool("dryrun", false, "Will do a dry run, but not actually delete anything")
+)
+
 func main() {
+	flag.Parse()
 	accessToken := os.Getenv(accessTokenVariable)
 	if accessToken == "" {
 		fmt.Printf("Please set the %s environment variable with your DigitalOcean token\n", accessTokenVariable)
@@ -36,12 +42,16 @@ func main() {
 		fmt.Printf("-> 💣 Deleting %d droplet(s)\n", len(droplets))
 		for _, droplet := range droplets {
 			fmt.Printf("\t-> Droplet %s...", droplet.Name)
-			_, err := client.Droplets.Delete(context.TODO(), droplet.ID)
-			if err != nil {
-				fmt.Printf("ERR: %v\n", err)
-				success = false
-			} else {
+			if !*dryrun {
+				_, err := client.Droplets.Delete(context.TODO(), droplet.ID)
+				if err != nil {
+					fmt.Printf("ERR: %v\n", err)
+					success = false
+					continue
+				}
 				fmt.Printf("\t DELETED\n")
+			} else {
+				fmt.Printf("\t (not) DELETED\n")
 			}
 		}
 	}
