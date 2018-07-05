@@ -26,4 +26,4 @@ do-shutdown
 
 ## License
 
-MIT-licensed
+See [LICENSE](LICENSE)
