@@ -15,17 +15,17 @@ const accessTokenVariable = "DIGITALOCEAN_ACCESS_TOKEN"
 
 var (
 	dryrun = flag.Bool("dryrun", false, "Will do a dry run, but not actually delete anything")
+	token  = flag.String("token", os.Getenv(accessTokenVariable), "DigitalOcean Personal Access Token")
 )
 
 func main() {
 	flag.Parse()
-	accessToken := os.Getenv(accessTokenVariable)
-	if accessToken == "" {
-		fmt.Printf("Please set the %s environment variable with your DigitalOcean token\n", accessTokenVariable)
+	if *token == "" {
+		fmt.Printf("No token specified. Please specifiy either with -token flag or %s env variable\n", accessTokenVariable)
 		os.Exit(1)
 	}
 
-	oauthClient := oauth2.NewClient(context.Background(), &tokenSource{AccessToken: accessToken})
+	oauthClient := oauth2.NewClient(context.Background(), &tokenSource{AccessToken: *token})
 	client := godo.NewClient(oauthClient)
 
 	droplets, err := fetchDroplets(client)
